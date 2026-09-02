@@ -9,8 +9,20 @@ from mini_zx_library.model import (
     Transformation,
     sha256_bytes,
 )
+from mini_zx_library.registry import (
+    Artifact,
+    ArtifactConflictError,
+    ArtifactKind,
+    ArtifactNotFoundError,
+    ArtifactRegistry,
+)
 
 __all__ = [
+    "Artifact",
+    "ArtifactConflictError",
+    "ArtifactKind",
+    "ArtifactNotFoundError",
+    "ArtifactRegistry",
     "DerivedGraphArtifact",
     "GraphRepresentation",
     "QecSidecar",

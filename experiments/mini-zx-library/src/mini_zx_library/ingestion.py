@@ -10,6 +10,7 @@ from mini_zx_library.model import (
     QecSidecar,
     RawGraphArtifact,
     SourceIdentity,
+    SourceProvenance,
     sha256_bytes,
 )
 
@@ -21,6 +22,7 @@ class SourceDocument:
     collection: str
     entry_id: str
     revision: str
+    provenance: SourceProvenance
     content: bytes
 
 
@@ -71,5 +73,6 @@ class CorpusBuilder:
         return RawGraphArtifact(
             source=source_identity,
             graph=graph,
+            provenance=source.provenance,
             qec=result.qec,
         )

@@ -86,6 +86,26 @@ This keeps source interpretation separate from corpus identity policy and preven
 
 The internal import result is visible in this public repository but is not part of the supported public API.
 
+## Provenance policy
+
+Every raw artifact carries a required provenance record containing:
+
+- the upstream URL;
+- the source path;
+- the upstream license expression;
+- a supporting license reference; and
+- the corpus distribution mode.
+
+`NOASSERTION` is permitted when no verified license can be identified. This records uncertainty explicitly rather than treating missing license information as permission to redistribute an artifact.
+
+Distribution modes describe corpus behaviour—not legal conclusions:
+
+- `BUNDLED`: the artifact is distributed with the corpus;
+- `FETCHED`: the artifact is acquired separately from its upstream source; and
+- `REFERENCE_ONLY`: the corpus records the source but does not acquire or redistribute it.
+
+Derived artifacts retain provenance transitively through their parent artifact identity.
+
 ## Minimum viable experiment
 
 The experiment will implement only enough functionality to test these architectural claims:

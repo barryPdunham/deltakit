@@ -5,10 +5,12 @@ from dataclasses import FrozenInstanceError
 import pytest
 from mini_zx_library.model import (
     DerivedGraphArtifact,
+    DistributionMode,
     GraphRepresentation,
     QecSidecar,
     RawGraphArtifact,
     SourceIdentity,
+    SourceProvenance,
     Transformation,
     sha256_bytes,
 )
@@ -50,8 +52,16 @@ def test_adapter_version_changes_raw_identity() -> None:
 
 def test_graph_digest_is_evidence_not_raw_identity() -> None:
     source = make_source()
-    first = RawGraphArtifact(source=source, graph=make_graph(b"first"))
-    second = RawGraphArtifact(source=source, graph=make_graph(b"second"))
+    first = RawGraphArtifact(
+        source=source,
+        graph=make_graph(b"first"),
+        provenance=make_provenance(),
+    )
+    second = RawGraphArtifact(
+        source=source,
+        graph=make_graph(b"second"),
+        provenance=make_provenance(),
+    )
 
     assert first.artifact_id == second.artifact_id
     assert first.graph.graph_sha256 != second.graph.graph_sha256
@@ -68,6 +78,7 @@ def test_qec_sidecar_preserves_counts() -> None:
     artifact = RawGraphArtifact(
         source=make_source(),
         graph=make_graph(),
+        provenance=make_provenance(),
         qec=sidecar,
     )
 
@@ -119,6 +130,7 @@ def test_derived_identity_includes_lineage_and_output() -> None:
     parent = RawGraphArtifact(
         source=make_source(),
         graph=make_graph(),
+        provenance=make_provenance(),
     )
     transformation = Transformation(
         name="simplify",
@@ -145,3 +157,47 @@ def test_derived_identity_includes_lineage_and_output() -> None:
     assert first.artifact_id == repeated.artifact_id
     assert first.artifact_id.startswith("derived:sha256:")
     assert first.artifact_id != different_output.artifact_id
+
+
+def make_provenance(
+    *,
+    license_expression: str = "Apache-2.0",
+) -> SourceProvenance:
+    """Return representative source provenance."""
+    return SourceProvenance(
+        upstream_url="https://example.com/upstream",
+        source_path="circuits/example.qasm",
+        license_expression=license_expression,
+        license_reference="https://example.com/upstream/LICENSE",
+        distribution_mode=DistributionMode.FETCHED,
+    )
+
+
+def test_provenance_accepts_explicit_noassertion() -> None:
+    provenance = make_provenance(license_expression="NOASSERTION")
+
+    assert provenance.license_expression == "NOASSERTION"
+    assert provenance.distribution_mode is DistributionMode.FETCHED
+
+
+def test_provenance_is_immutable() -> None:
+    provenance = make_provenance()
+
+    with pytest.raises(FrozenInstanceError):
+        provenance.source_path = "changed.qasm"  # type: ignore[misc]
+
+
+def test_provenance_rejects_invalid_distribution_mode() -> None:
+    with pytest.raises(TypeError, match="must be a DistributionMode"):
+        SourceProvenance(
+            upstream_url="https://example.com/upstream",
+            source_path="circuits/example.qasm",
+            license_expression="Apache-2.0",
+            license_reference="https://example.com/upstream/LICENSE",
+            distribution_mode="fetched",  # type: ignore[arg-type]
+        )
+
+
+def test_provenance_rejects_empty_license_expression() -> None:
+    with pytest.raises(ValueError, match="license_expression must not be empty"):
+        make_provenance(license_expression="")

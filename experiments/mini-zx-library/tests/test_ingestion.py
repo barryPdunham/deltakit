@@ -7,7 +7,12 @@ from mini_zx_library.ingestion import (
     SourceDocument,
     _ImportResult,
 )
-from mini_zx_library.model import QecSidecar, sha256_bytes
+from mini_zx_library.model import (
+    DistributionMode,
+    QecSidecar,
+    SourceProvenance,
+    sha256_bytes,
+)
 from mini_zx_library.registry import ArtifactConflictError, ArtifactRegistry
 
 
@@ -66,12 +71,24 @@ class _VersionedFixtureAdapter:
         )
 
 
+def make_provenance(source_path: str) -> SourceProvenance:
+    """Return provenance corresponding to an ingestion fixture."""
+    return SourceProvenance(
+        upstream_url="https://example.com/benchmarks",
+        source_path=source_path,
+        license_expression="Apache-2.0",
+        license_reference="https://example.com/benchmarks/LICENSE",
+        distribution_mode=DistributionMode.FETCHED,
+    )
+
+
 def test_builder_applies_shared_hashing_to_qasm_adapter() -> None:
     source = SourceDocument(
         collection="benchpress",
         entry_id="example.qasm",
         revision="abc123",
         content=b"OPENQASM example",
+        provenance=make_provenance("circuits/example.qasm"),
     )
 
     artifact = CorpusBuilder().build(source, _QasmFixtureAdapter())
@@ -79,6 +96,7 @@ def test_builder_applies_shared_hashing_to_qasm_adapter() -> None:
     assert artifact.source.source_sha256 == sha256_bytes(source.content)
     assert artifact.graph.graph_sha256 == sha256_bytes(b"qasm-graph:" + source.content)
     assert artifact.source.adapter_name == _QasmFixtureAdapter.name
+    assert artifact.provenance is source.provenance
     assert artifact.qec is None
 
 
@@ -88,6 +106,7 @@ def test_builder_preserves_stim_qec_sidecar() -> None:
         entry_id="example.stim",
         revision="def456",
         content=b"H 0\nM 0\nDETECTOR rec[-1]",
+        provenance=make_provenance("circuits/example.stim"),
     )
 
     artifact = CorpusBuilder().build(source, _StimFixtureAdapter())
@@ -95,6 +114,7 @@ def test_builder_preserves_stim_qec_sidecar() -> None:
     assert artifact.source.source_sha256 == sha256_bytes(source.content)
     assert artifact.graph.graph_sha256 == sha256_bytes(b"stim-graph:" + source.content)
     assert artifact.qec is not None
+    assert artifact.provenance is source.provenance
     assert artifact.qec.source_format == "stim"
 
 
@@ -104,6 +124,7 @@ def test_adapter_version_changes_artifact_identity() -> None:
         entry_id="versioned.source",
         revision="revision",
         content=b"source",
+        provenance=make_provenance("circuits/versioned.source"),
     )
     builder = CorpusBuilder()
 
@@ -125,6 +146,7 @@ def test_registry_detects_conversion_drift() -> None:
         entry_id="drift.source",
         revision="revision",
         content=b"unchanged source",
+        provenance=make_provenance("circuits/drift.source"),
     )
     builder = CorpusBuilder()
 

@@ -3,10 +3,12 @@
 import pytest
 from mini_zx_library.model import (
     DerivedGraphArtifact,
+    DistributionMode,
     GraphRepresentation,
     QecSidecar,
     RawGraphArtifact,
     SourceIdentity,
+    SourceProvenance,
     Transformation,
     sha256_bytes,
 )
@@ -42,6 +44,17 @@ def make_graph(content: bytes) -> GraphRepresentation:
     )
 
 
+def make_provenance(entry_id: str) -> SourceProvenance:
+    """Return provenance corresponding to a registry fixture."""
+    return SourceProvenance(
+        upstream_url="https://example.com/benchmarks",
+        source_path=f"circuits/{entry_id}",
+        license_expression="Apache-2.0",
+        license_reference="https://example.com/benchmarks/LICENSE",
+        distribution_mode=DistributionMode.FETCHED,
+    )
+
+
 def make_raw(
     *,
     collection: str = "benchpress",
@@ -66,6 +79,7 @@ def make_raw(
             entry_id=entry_id,
         ),
         graph=make_graph(graph_content),
+        provenance=make_provenance(entry_id),
         qec=sidecar,
     )
 

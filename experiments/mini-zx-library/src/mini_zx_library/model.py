@@ -6,10 +6,19 @@ import hashlib
 import json
 import re
 from dataclasses import dataclass
+from enum import Enum
 from typing import Final
 
 _SHA256_PATTERN: Final = re.compile(r"^[0-9a-f]{64}$")
 _PARAMETER_PAIR_LENGTH: Final = 2
+
+
+class DistributionMode(Enum):
+    """How the corpus makes an upstream artifact available."""
+
+    BUNDLED = "bundled"
+    FETCHED = "fetched"
+    REFERENCE_ONLY = "reference-only"
 
 
 def sha256_bytes(content: bytes) -> str:
@@ -43,6 +52,30 @@ def _identity_digest(kind: str, fields: dict[str, object]) -> str:
         sort_keys=True,
     ).encode("utf-8")
     return f"{kind}:sha256:{sha256_bytes(serialized)}"
+
+
+@dataclass(frozen=True, slots=True)
+class SourceProvenance:
+    """Documented origin, licensing, and distribution treatment."""
+
+    upstream_url: str
+    source_path: str
+    license_expression: str
+    license_reference: str
+    distribution_mode: DistributionMode
+
+    def __post_init__(self) -> None:
+        for field_name in (
+            "upstream_url",
+            "source_path",
+            "license_expression",
+            "license_reference",
+        ):
+            _require_text(field_name, getattr(self, field_name))
+
+        if not isinstance(self.distribution_mode, DistributionMode):
+            message = "distribution_mode must be a DistributionMode"
+            raise TypeError(message)
 
 
 @dataclass(frozen=True, slots=True)
@@ -122,6 +155,7 @@ class RawGraphArtifact:
 
     source: SourceIdentity
     graph: GraphRepresentation
+    provenance: SourceProvenance
     qec: QecSidecar | None = None
 
     @property

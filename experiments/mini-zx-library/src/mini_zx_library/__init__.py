@@ -7,10 +7,12 @@ from mini_zx_library.ingestion import (
 )
 from mini_zx_library.model import (
     DerivedGraphArtifact,
+    DistributionMode,
     GraphRepresentation,
     QecSidecar,
     RawGraphArtifact,
     SourceIdentity,
+    SourceProvenance,
     Transformation,
     sha256_bytes,
 )
@@ -30,12 +32,14 @@ __all__ = [
     "ArtifactRegistry",
     "CorpusBuilder",
     "DerivedGraphArtifact",
+    "DistributionMode",
     "GraphRepresentation",
     "QecSidecar",
     "RawGraphArtifact",
     "SourceAdapter",
     "SourceDocument",
     "SourceIdentity",
+    "SourceProvenance",
     "Transformation",
     "sha256_bytes",
 ]

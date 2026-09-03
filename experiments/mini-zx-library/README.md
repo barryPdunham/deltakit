@@ -76,6 +76,16 @@ This demonstrated that the ZX graph alone is not a lossless representation of th
 
 Exact qecirc sample identifier, counts, dependency versions, and hashes remain to be recovered from the original POC record.
 
+## Implementation refinement: artifact construction
+
+Source adapters interpret source-specific formats but do not independently construct corpus artifacts.
+
+An adapter returns a small internal import result containing the serialized raw graph, its format, and any QEC sidecar. A shared corpus builder then applies the corpus-wide source hashing, graph hashing, adapter identity, and artifact-construction rules.
+
+This keeps source interpretation separate from corpus identity policy and prevents adapters from implementing inconsistent hashing or provenance rules.
+
+The internal import result is visible in this public repository but is not part of the supported public API.
+
 ## Minimum viable experiment
 
 The experiment will implement only enough functionality to test these architectural claims:

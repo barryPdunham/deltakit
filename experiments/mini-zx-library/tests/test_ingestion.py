@@ -49,6 +49,19 @@ class _StimFixtureAdapter:
         )
 
 
+class _GraphNativeFixtureAdapter:
+    """Represent an adapter for an already serialized ZX graph."""
+
+    name = "graph-native-fixture"
+    version = "1"
+
+    def convert(self, source: SourceDocument) -> _ImportResult:
+        return _ImportResult(
+            graph_format="pyzx-json",
+            graph_content=source.content,
+        )
+
+
 class _VersionedFixtureAdapter:
     """Represent an adapter whose version can change."""
 
@@ -96,6 +109,26 @@ def test_builder_applies_shared_hashing_to_qasm_adapter() -> None:
     assert artifact.source.source_sha256 == sha256_bytes(source.content)
     assert artifact.graph.graph_sha256 == sha256_bytes(b"qasm-graph:" + source.content)
     assert artifact.source.adapter_name == _QasmFixtureAdapter.name
+    assert artifact.provenance is source.provenance
+    assert artifact.qec is None
+
+
+def test_builder_accepts_graph_native_input_without_circuit_conversion() -> None:
+    graph_content = b'{"graph": "bell-state"}'
+    source = SourceDocument(
+        collection="curated",
+        entry_id="bell-state.json",
+        revision="1",
+        content=graph_content,
+        provenance=make_provenance("graphs/bell-state.json"),
+    )
+
+    artifact = CorpusBuilder().build(source, _GraphNativeFixtureAdapter())
+
+    assert artifact.source.source_sha256 == sha256_bytes(graph_content)
+    assert artifact.graph.graph_sha256 == sha256_bytes(graph_content)
+    assert artifact.graph.format == "pyzx-json"
+    assert artifact.source.adapter_name == _GraphNativeFixtureAdapter.name
     assert artifact.provenance is source.provenance
     assert artifact.qec is None
 

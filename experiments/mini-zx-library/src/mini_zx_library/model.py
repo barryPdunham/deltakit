@@ -130,7 +130,7 @@ class GraphRepresentation:
 
 @dataclass(frozen=True, slots=True)
 class QecSidecar:
-    """QEC semantics preserved alongside, but outside, the ZX graph."""
+    """Portable, searchable summary of QEC context outside the ZX graph."""
 
     source_format: str
     qubit_count: int

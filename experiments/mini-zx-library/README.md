@@ -84,6 +84,14 @@ This demonstrated that the ZX graph alone is not a lossless representation of th
 
 Exact qecirc sample identifier, counts, dependency versions, and hashes remain to be recovered from the original POC record.
 
+### PyZX serialization Path of Pain
+
+Using pinned PyZX 0.10.6, repeated construction of the same graph with the same vertex insertion order produced byte-identical version-2 JSON and identical SHA-256 digests.
+
+Equivalent well-formed identity graphs constructed with different vertex insertion orders produced equal matrices but different vertex identifiers, JSON representations, and graph digests. PyZX JSON is therefore suitable as a reproducible representation of an exact conversion process, but its digest is not a canonical semantic identity for equivalent ZX graphs.
+
+Importing PyZX 0.10.6 under Deltakit’s warnings-as-errors pytest policy also exposed a Python enum `DeprecationWarning` in PyZX’s routing module. The experiment retains strict warning handling with a narrow exception for that identified upstream warning.
+
 ## Implementation refinement: artifact construction
 
 Source adapters interpret source-specific formats but do not independently construct corpus artifacts.

@@ -5,7 +5,9 @@ description = "Architecture experiment for a reproducible ZX-graph benchmark lib
 readme = "README.md"
 requires-python = ">=3.10,<3.15"
 license = "Apache-2.0"
-dependencies = []
+dependencies = [
+    "pyzx==0.10.6",
+]
 
 [build-system]
 requires = ["setuptools>=80"]
@@ -14,4 +16,13 @@ build-backend = "setuptools.build_meta"
 [dependency-groups]
 test = [
   "pytest>=9.0,<9.2.0",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = ["-ra", "--showlocals", "--strict-markers", "--strict-config"]
+xfail_strict = true
+filterwarnings = [
+  "error",
+  'ignore:In 3[.]13 classes created inside an enum will not become a member[.].*:DeprecationWarning',
 ]

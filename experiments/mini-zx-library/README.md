@@ -106,6 +106,16 @@ Distribution modes describe corpus behaviour—not legal conclusions:
 
 Derived artifacts retain provenance transitively through their parent artifact identity.
 
+## Compiler-stack findings
+
+Deltakit-compile 0.1.0 uses an xDSL/MLIR-based compiler stack containing multiple levels of QEC representation. Its IR can represent measurements, detectors, observables, stabiliser flows, quantum effects, noise, and other relationships that cannot be preserved by a ZX graph or by summary counts alone.
+
+The experiment therefore does not assume that every source should be normalized directly into a ZX graph plus metadata. A source adapter may use a richer semantic representation, including Deltakit IR, when appropriate. That representation is optional and is not part of the corpus core model.
+
+The corpus must not depend directly on unstable compiler dialect internals. The authoritative imported input remains the pinned source artifact identified by its source digest and provenance. A retained intermediate representation, if any, is a derived artifact whose compiler and serialization versions must be recorded.
+
+`QecSidecar` is currently a portable, searchable summary of QEC context. It is not a lossless substitute for the original source or a richer compiler IR. ZX graphs remain extracted computational artifacts and do not claim to represent the complete QEC program.
+
 ## Minimum viable experiment
 
 The experiment will implement only enough functionality to test these architectural claims:

@@ -2,11 +2,11 @@
 
 ## Status
 
-Experimental architecture probe based on Deltakit issue #319. This directory is not a proposed production package or upstream repository layout.
+Architecture version 1.2. This is an independent, time-boxed learning and prototyping exercise informed by Deltakit issue #319. It is not a funded deliverable, proposed production package, or proposed upstream repository layout.
 
 ## Question
 
-Can a thin corpus and metadata layer provide reproducible, bulk-accessible ZX-graph benchmarks from heterogeneous circuit sources while preserving source-specific QEC semantics outside the ZX representation?
+Can a thin corpus layer provide reproducible, bulk-accessible ZX-graph benchmarks from heterogeneous sources while retaining authoritative source identity and provenance, portable QEC summaries, and links to richer semantic representations when needed?
 
 ## Architecture under test
 
@@ -14,35 +14,43 @@ Can a thin corpus and metadata layer provide reproducible, bulk-accessible ZX-gr
 Upstream sources
 ├── QASM / Benchpress
 ├── Stim / qecirc
-└── Curated graph-only entries
+└── Curated graph-native entries
           │
           ▼
-Source adapters
+Source-specific adapters
           │
-          ▼
-Immutable raw artifact + metadata + QEC sidecar
-          │
-          │
-          ├── Registry and bulk retrieval
-          └── Transformations → derived artifacts with lineage
+          ├── optional richer semantic representation
+          ├── portable metadata and QEC summary
+          └── raw, unsimplified ZX graph
+                          │
+                          ▼
+                  Shared corpus builder
+                          │
+                          ▼
+              Immutable raw ZX artifact
+                          │
+                          ├── registry and bulk retrieval
+                          └── transformations → derived artifacts
 ```
 
 ### Core boundaries
 
-1. **Source adapters** convert supported source formats into raw, unsimplified PyZX graphs.
+1. **Source adapters** interpret supported source formats and produce raw, unsimplified ZX graphs. They may use richer intermediate representations when appropriate.
 2. **Artifact records** identify each graph and record its provenance, source revision, hashes, licensing, metadata, and representation.
 3. **The registry** retrieves individual artifacts or filtered collections in bulk.
 4. **Transformations** produce derived artifacts without mutating the imported raw artifact.
-5. **QEC sidecars** preserve semantics that cannot be represented faithfully in a unitary ZX graph.
+5. **QEC sidecars** provide portable, searchable summaries of QEC context. They do not replace the authoritative source or a richer semantic representation.
+6. **Semantic representations** such as Deltakit IR are optional and remain outside the source-independent corpus core.
 
 ## Architecture rules
 
 1. An imported raw ZX graph is an immutable benchmark artifact.
 2. Simplification or rewriting produces a new derived artifact with explicit parentage and transformation metadata.
-3. QEC semantics are preserved alongside the ZX representation rather than forced into it.
-4. Imports must be reproducible from a pinned upstream revision and source hash.
-5. Licensing and provenance are properties of each source artifact, not merely of the Python package.
-6. The core data model must not contain source-specific conditional logic.
+3. The original source remains authoritative for semantics not represented by the ZX graph.
+4. Portable summaries and optional richer representations are linked alongside the ZX graph rather than forced into it.
+5. Imports must be reproducible from a pinned upstream revision and source hash.
+6. Licensing and provenance are properties of each source artifact, not merely of the Python package.
+7. The core data model must not contain source-specific or compiler-specific conditional logic.
 
 ## Identity strategy
 
@@ -72,7 +80,7 @@ A qecirc/Stim proof of concept reproduced Deltakit’s repeated-target `Duplicat
 * detector and observable counts were preserved separately; and
 * the circuit’s computational content was converted reproducibly to PyZX.
 
-This demonstrated that the ZX graph alone is not a lossless representation of the original QEC circuit. Detector, observable, measurement, and other non-unitary semantics require a sidecar representation linked to the raw graph artifact.
+This demonstrated that the ZX graph alone is not a lossless representation of the original QEC circuit. The original Stim source remains authoritative for detector, observable, measurement, and other non-unitary semantics. A linked sidecar can expose a portable summary, while a richer semantic representation may be retained when justified.
 
 Exact qecirc sample identifier, counts, dependency versions, and hashes remain to be recovered from the original POC record.
 
@@ -80,7 +88,7 @@ Exact qecirc sample identifier, counts, dependency versions, and hashes remain t
 
 Source adapters interpret source-specific formats but do not independently construct corpus artifacts.
 
-An adapter returns a small internal import result containing the serialized raw graph, its format, and any QEC sidecar. A shared corpus builder then applies the corpus-wide source hashing, graph hashing, adapter identity, and artifact-construction rules.
+An adapter returns a small internal import result containing the serialized raw graph, its format, and an optional portable QEC summary. A shared corpus builder then applies the corpus-wide source hashing, graph hashing, adapter identity, and artifact-construction rules.
 
 This keeps source interpretation separate from corpus identity policy and prevents adapters from implementing inconsistent hashing or provenance rules.
 
@@ -112,7 +120,7 @@ Deltakit-compile 0.1.0 uses an xDSL/MLIR-based compiler stack containing multipl
 
 The experiment therefore does not assume that every source should be normalized directly into a ZX graph plus metadata. A source adapter may use a richer semantic representation, including Deltakit IR, when appropriate. That representation is optional and is not part of the corpus core model.
 
-The corpus must not depend directly on unstable compiler dialect internals. The authoritative imported input remains the pinned source artifact identified by its source digest and provenance. A retained intermediate representation, if any, is a derived artifact whose compiler and serialization versions must be recorded.
+The corpus must not depend directly on unstable compiler dialect internals. The authoritative imported input remains the pinned source artifact identified by its source digest and provenance. A retained intermediate representation, if any, is a separately versioned semantic artifact whose source lineage, compiler version, and serialization version must be recorded.
 
 `QecSidecar` is currently a portable, searchable summary of QEC context. It is not a lossless substitute for the original source or a richer compiler IR. ZX graphs remain extracted computational artifacts and do not claim to represent the complete QEC program.
 
@@ -120,28 +128,33 @@ The corpus must not depend directly on unstable compiler dialect internals. The 
 
 The experiment will implement only enough functionality to test these architectural claims:
 
-1. Import one representative QASM circuit.
-2. Import the computational portion of one representative Stim/QEC circuit.
-3. Preserve the Stim/QEC metadata in a linked sidecar.
-4. Assign stable identities and hashes to raw artifacts;
-5. retrieve both artifacts through one registry API;
-6. filter the registry using selected metadata;
-7. apply one deterministic ZX transformation;
-8. record the derived artifact’s parent and transformation parameters; and
-9. repeat the build and confirm identical raw-artifact identities.
+1. Assemble 6–10 deliberately diverse entries, including QASM, Stim/QEC, and graph-native inputs.
+2. Apply provenance, licensing, and reproducibility admission gates to every entry.
+3. Import at least one representative QASM circuit.
+4. Import the computational portion of at least one representative Stim/QEC circuit.
+5. Preserve a portable QEC summary while retaining an unambiguous link to the authoritative source.
+6. Import at least one graph-native entry without forcing it through a circuit representation.
+7. Assign stable identities and hashes to raw artifacts.
+8. Retrieve heterogeneous artifacts through one registry API and filter them using selected metadata.
+9. Apply one deterministic ZX transformation and record the derived artifact’s parent and transformation parameters.
+10. Repeat the build and confirm identical raw-artifact identities.
 
-Upstream benchmark files should not be committed until their licensing and redistribution terms have been verified. The experiment may initially use generated fixtures or locally acquired source files.
+A Deltakit-aware adapter may use compiler IR when it adds demonstrable value, but the experiment will not require Deltakit IR as its universal input or persistence model.
+
+Upstream benchmark files must not be committed until their licensing and redistribution terms have been verified. The experiment may use generated fixtures or locally acquired source files where redistribution is not permitted.
 
 ## Success criteria
 
 The architecture passes if:
 
-* heterogeneous sources produce records conforming to one core model;
+* heterogeneous circuit and graph-native sources produce records conforming to one core model;
 * repeated imports of identical inputs produce identical raw-artifact identities;
 * raw artifacts remain unchanged after transformations;
 * derived artifacts retain complete lineage;
 * bulk retrieval does not require callers to understand individual adapters;
-* relevant QEC counts and annotations survive outside the ZX graph; and
+* portable QEC summaries remain linked unambiguously to their authoritative sources;
+* richer semantic representations can be used without coupling the corpus core to compiler internals;
+* every admitted entry has explicit provenance, licensing status, and distribution policy; and
 * adding another adapter does not require modifying the core artifact model.
 
 ## Falsification criteria
@@ -166,9 +179,11 @@ This miniature experiment will not:
 * reproduce all QEC semantics directly in ZX;
 * develop a general ZX rewriting engine;
 * optimize benchmark graphs;
-* establish performance claims; or
-* open an upstream pull request.
+* establish performance claims;
+* open an upstream pull request;
+* adopt Deltakit IR as a universal interchange format; or
+* complete the discovery or implementation work contemplated by issue #319.
 
 ## Stop condition
 
-Once the experiment either satisfies a success criterion or exposes a falsifying architectural constraint, preserve the evidence and stop expanding the prototype. Further implementation requires a separate decision.
+Stop when the applicable success criteria have been tested and the architectural question has been answered, or when a falsifying constraint appears. Preserve the evidence without expanding the prototype into a complete benchmark product. Further implementation requires a separate decision.

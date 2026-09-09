@@ -92,6 +92,20 @@ This demonstrated that the ZX graph alone is not a lossless representation of th
 
 Exact qecirc sample identifier, counts, dependency versions, and hashes remain to be recovered from the original POC record.
 
+### Generated Stim repetition-code Path of Pain
+
+Using official Stim 1.16.0, the experiment generated a deterministic distance-three, two-round repetition-code memory circuit containing five qubits, seven measurements, six detectors, and one observable. Stim preserved target ordering, flattened repeated blocks deterministically, and exposed the required portable counts directly.
+
+The generated circuit interleaves reset, unitary gates, measurement-and-reset, later unitary gates, final measurements, detectors, and an observable. Removing the non-unitary instructions and concatenating the remaining gates would falsely represent the circuit as uninterrupted coherent evolution. Structural ZX-graph well-formedness would not restore the omitted state-preparation, measurement-history, detector, or observable relationships.
+
+This falsifies the naïve one-source-to-one-unitary-graph design for realistic QEC circuits, but does not rule out Stim support. Honest alternatives include richer semantic retention, multiple linked ZX segments, or an explicitly restricted Stim subset. No Stim adapter will be implemented until one of those representation contracts is justified within the experiment’s time box.
+
+### Candidate source-first refinement
+
+The smallest unimplemented refinement would separate authoritative source identity from conversion identity. A source artifact would record the collection, entry, revision, source digest, provenance, and optional portable QEC summary. Zero or more linked graph extractions would separately record their adapter, adapter version, extraction scope, and graph digest.
+
+This could represent multiple computational segments from one QEC source without treating any segment as the complete program. It remains a paper design: implementing segment boundaries and their relationships to resets, measurements, detectors, and observables is not justified without a separately funded or explicitly scoped development decision.
+
 ### PyZX serialization Path of Pain
 
 Using pinned PyZX 0.10.6, repeated construction of the same graph with the same vertex insertion order produced byte-identical version-2 JSON and identical SHA-256 digests.

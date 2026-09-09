@@ -1,5 +1,9 @@
 """Experimental data model for a reproducible ZX-graph library."""
 
+from mini_zx_library.admission import (
+    ProvenanceAdmissionError,
+    require_admissible_provenance,
+)
 from mini_zx_library.ingestion import (
     CorpusBuilder,
     SourceAdapter,
@@ -37,6 +41,7 @@ __all__ = [
     "DistributionMode",
     "GraphRepresentation",
     "OpenQasm2Adapter",
+    "ProvenanceAdmissionError",
     "PyZXJsonAdapter",
     "QecSidecar",
     "RawGraphArtifact",
@@ -45,5 +50,6 @@ __all__ = [
     "SourceIdentity",
     "SourceProvenance",
     "Transformation",
+    "require_admissible_provenance",
     "sha256_bytes",
 ]

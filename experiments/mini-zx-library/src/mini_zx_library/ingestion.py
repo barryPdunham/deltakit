@@ -5,6 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Protocol
 
+from mini_zx_library.admission import require_admissible_provenance
 from mini_zx_library.model import (
     GraphRepresentation,
     QecSidecar,
@@ -55,6 +56,7 @@ class CorpusBuilder:
         adapter: SourceAdapter,
     ) -> RawGraphArtifact:
         """Convert a source and construct its immutable raw artifact."""
+        require_admissible_provenance(source.provenance)
         result = adapter.convert(source)
 
         source_identity = SourceIdentity(

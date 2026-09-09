@@ -17,6 +17,7 @@ from mini_zx_library.model import (
     sha256_bytes,
 )
 from mini_zx_library.pyzx_json import PyZXJsonAdapter
+from mini_zx_library.qasm import OpenQasm2Adapter
 from mini_zx_library.registry import (
     Artifact,
     ArtifactConflictError,
@@ -35,6 +36,7 @@ __all__ = [
     "DerivedGraphArtifact",
     "DistributionMode",
     "GraphRepresentation",
+    "OpenQasm2Adapter",
     "PyZXJsonAdapter",
     "QecSidecar",
     "RawGraphArtifact",

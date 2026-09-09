@@ -122,6 +122,10 @@ Every raw artifact carries a required provenance record containing:
 
 `NOASSERTION` is permitted when no verified license can be identified. This records uncertainty explicitly rather than treating missing license information as permission to redistribute an artifact.
 
+The minimum automated admission policy permits `NOASSERTION` only with `REFERENCE_ONLY`. `CorpusBuilder` applies this rule before invoking a source adapter, preventing sources with unidentified licensing from being bundled or automatically fetched.
+
+Passing this minimum gate means only that the required provenance and distribution treatment have been declared consistently. It does not determine legal permission or verify that an identified license is compatible with every use.
+
 Distribution modes describe corpus behaviour—not legal conclusions:
 
 - `BUNDLED`: the artifact is distributed with the corpus;

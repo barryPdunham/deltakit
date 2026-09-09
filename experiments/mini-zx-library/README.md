@@ -71,6 +71,14 @@ A prior proof of concept established that a selected Benchpress/QASM circuit cou
 
 Exact circuit identifier, dependency versions, graph counts, and hashes remain to be recovered from the original POC record.
 
+### OpenQASM 2 conversion boundary
+
+Using generated, license-safe fixtures, the experiment confirmed that pinned PyZX 0.10.6 converts supported unitary OpenQASM 2 circuits into well-formed version-2 JSON graphs reproducibly. Repeated conversion of identical source content produced byte-identical graph serialization.
+
+PyZX also accepts OpenQASM 2 `measure` and `reset` operations and converts them into structurally well-formed graphs. Those graphs contain symbolic parameters representing non-unitary semantics and cannot be converted into concrete matrices. The initial `OpenQasm2Adapter` therefore rejects measurement and reset rather than silently discarding or misrepresenting them.
+
+For this experiment, “raw” or “unsimplified” means that the adapter applies no post-conversion ZX rewrite or simplification pass. PyZX may still normalize source-level operations during parsing; for example, an identity gate may not remain as an explicit graph operation. The pinned source artifact remains authoritative.
+
 ### qecirc Path of Pain
 
 A qecirc/Stim proof of concept reproduced Deltakit’s repeated-target `DuplicateQubitError`. After isolating and correcting that parser issue:

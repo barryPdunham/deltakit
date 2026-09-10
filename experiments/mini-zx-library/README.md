@@ -114,6 +114,14 @@ Equivalent well-formed identity graphs constructed with different vertex inserti
 
 Importing PyZX 0.10.6 under Deltakit’s warnings-as-errors pytest policy also exposed a Python enum `DeprecationWarning` in PyZX’s routing module. The experiment retains strict warning handling with a narrow exception for that identified upstream warning.
 
+### Deterministic transformation and lineage
+
+Using pinned PyZX 0.10.6, the experiment applied `spider_simp` to a controlled four-vertex graph containing adjacent Z spiders. The transformation reduced the graph to three vertices while preserving structural well-formedness and matrix semantics.
+
+`DerivationBuilder` verifies that supplied parent graph bytes match the digest recorded by the parent artifact before invoking a transformer. It then applies shared hashing and constructs a derived artifact recording the parent identity, transformation name and version, canonical parameters, output format, and output digest. Mismatched parent content is rejected before transformation.
+
+Repeated application to the same parent produced byte-identical version-2 JSON, identical graph digests, and identical derived-artifact identities. The parent remained unchanged. `DerivedGraphResult` returns the serialized output alongside the thin artifact record, keeping content persistence separate from identity and lineage metadata.
+
 ## Implementation refinement: artifact construction
 
 Source adapters interpret source-specific formats but do not independently construct corpus artifacts.

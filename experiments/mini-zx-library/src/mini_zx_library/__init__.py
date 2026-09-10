@@ -4,6 +4,12 @@ from mini_zx_library.admission import (
     ProvenanceAdmissionError,
     require_admissible_provenance,
 )
+from mini_zx_library.derivation import (
+    DerivationBuilder,
+    DerivedGraphResult,
+    GraphDigestMismatchError,
+    GraphTransformer,
+)
 from mini_zx_library.ingestion import (
     CorpusBuilder,
     SourceAdapter,
@@ -21,6 +27,7 @@ from mini_zx_library.model import (
     sha256_bytes,
 )
 from mini_zx_library.pyzx_json import PyZXJsonAdapter
+from mini_zx_library.pyzx_transform import PyZXSpiderSimplifier
 from mini_zx_library.qasm import OpenQasm2Adapter
 from mini_zx_library.registry import (
     Artifact,
@@ -37,12 +44,17 @@ __all__ = [
     "ArtifactNotFoundError",
     "ArtifactRegistry",
     "CorpusBuilder",
+    "DerivationBuilder",
     "DerivedGraphArtifact",
+    "DerivedGraphResult",
     "DistributionMode",
+    "GraphDigestMismatchError",
     "GraphRepresentation",
+    "GraphTransformer",
     "OpenQasm2Adapter",
     "ProvenanceAdmissionError",
     "PyZXJsonAdapter",
+    "PyZXSpiderSimplifier",
     "QecSidecar",
     "RawGraphArtifact",
     "SourceAdapter",

@@ -2,13 +2,23 @@
 
 ## Status
 
-Architecture version 1.2. This is an independent, time-boxed learning and prototyping exercise informed by Deltakit issue #319. It is not a funded deliverable, proposed production package, or proposed upstream repository layout.
+Architecture version 1.2 concluded on 2026-09-10. This independent, time-boxed learning and prototyping exercise was informed by Deltakit issue #319. It is not a funded deliverable, proposed production package, or proposed upstream repository layout. The prototype is preserved as evidence; further implementation requires a separately scoped decision.
 
 ## Question
 
 Can a thin corpus layer provide reproducible, bulk-accessible ZX-graph benchmarks from heterogeneous sources while retaining authoritative source identity and provenance, portable QEC summaries, and links to richer semantic representations when needed?
 
-## Architecture under test
+## Outcome
+
+Partially. A thin, source-independent corpus layer works for inputs that can honestly produce a ZX graph. The experiment demonstrated reproducible OpenQASM 2 and graph-native ingestion, immutable source-based identity, minimum provenance admission, heterogeneous registry access, and deterministic transformation lineage.
+
+The graph-centered design does not generalize honestly to realistic Stim/QEC programs. Reset, measurement, detector, observable, and later unitary operations form relationships that cannot be represented by removing non-unitary instructions and concatenating the remaining gates into one coherent ZX graph. Structural graph well-formedness does not recover those omitted semantics.
+
+A future architecture should separate authoritative source artifacts from optional graph extractions. One source could retain portable summaries and richer semantic representations while linking to zero or more scoped ZX graphs and their derived transformations. That refinement was documented but deliberately not implemented within this experiment.
+
+## Original architecture under test
+
+The experiment began with the following graph-centered design. Its QASM, graph-native, registry, identity, provenance, and derivation boundaries were validated, while its universal one-source-to-one-graph assumption was falsified for realistic QEC inputs.
 
 ```text
 Upstream sources
@@ -166,9 +176,9 @@ The corpus must not depend directly on unstable compiler dialect internals. The 
 
 `QecSidecar` is currently a portable, searchable summary of QEC context. It is not a lossless substitute for the original source or a richer compiler IR. ZX graphs remain extracted computational artifacts and do not claim to represent the complete QEC program.
 
-## Minimum viable experiment
+## Planned minimum viable experiment
 
-The experiment will implement only enough functionality to test these architectural claims:
+The experiment was scoped to implement only enough functionality to test these architectural claims:
 
 1. Assemble 6–10 deliberately diverse entries, including QASM, Stim/QEC, and graph-native inputs.
 2. Apply provenance, licensing, and reproducibility admission gates to every entry.
@@ -213,7 +223,7 @@ The architecture should be reconsidered if:
 
 ## Non-goals
 
-This miniature experiment will not:
+This miniature experiment did not aim to:
 
 * create the complete benchmark corpus;
 * define Deltakit’s final package or repository name;
@@ -229,3 +239,34 @@ This miniature experiment will not:
 ## Stop condition
 
 Stop when the applicable success criteria have been tested and the architectural question has been answered, or when a falsifying constraint appears. Preserve the evidence without expanding the prototype into a complete benchmark product. Further implementation requires a separate decision.
+
+## Closure audit
+
+| Objective | Outcome |
+| --- | --- |
+| Assemble 6–10 deliberately diverse entries | Not completed. Additional repetitive fixtures would add volume without resolving another architectural question. |
+| Apply provenance, licensing, and reproducibility gates | Demonstrated at experimental scale through required provenance, deterministic hashing, and pre-conversion admission. |
+| Import representative OpenQASM 2 | Demonstrated with generated, license-safe unitary fixtures. |
+| Import representative Stim/QEC computational content | Partially demonstrated in an earlier qecirc proof of concept; the general one-graph conversion contract was subsequently falsified by a realistic generated repetition-code circuit. |
+| Preserve a linked portable QEC summary | Structurally demonstrated through `QecSidecar`; not exercised through a production Stim adapter. |
+| Import graph-native input directly | Demonstrated through `PyZXJsonAdapter`. |
+| Assign stable identities and hashes | Demonstrated for raw and derived artifacts. |
+| Retrieve heterogeneous artifacts through one registry | Demonstrated at miniature in-memory scale. |
+| Apply a deterministic transformation with lineage | Demonstrated through `PyZXSpiderSimplifier` and `DerivationBuilder`. |
+| Repeat builds and confirm stable identities | Demonstrated for ingestion and derivation paths. |
+
+The experiment did not test lazy or persistent corpus storage, a complete benchmark collection, production-scale licensing review, or a lossless QEC semantic representation. These remain separate design and implementation questions.
+
+## Lessons learned
+
+- Authoritative source identity should be conceptually separate from conversion and graph-extraction identity.
+- A reproducible serialization digest identifies an exact conversion result, not the semantic equivalence class of a ZX graph.
+- Structural graph well-formedness does not prove that a conversion preserved the source program’s full semantics.
+- Thin source-independent builders are useful for applying shared hashing, provenance, and lineage policy consistently.
+- Provenance admission can prevent obviously inconsistent distribution treatment, but it does not replace legal or license-compatibility review.
+- Raw graph immutability and explicit derived lineage work cleanly when parent content is verified against its recorded digest.
+- A narrowly chosen path-of-pain test can be more valuable than expanding a prototype: the realistic Stim circuit exposed the principal architectural limit before substantial implementation effort was spent.
+
+## Final stopping decision
+
+The applicable success criteria have been tested, and a falsifying constraint has been identified for the universal graph-centered design. In accordance with the stop condition, active implementation ends here. The evidence is preserved without expanding the prototype into a complete benchmark product.
